@@ -1,0 +1,7 @@
+envirment setup
+
+gihub configuration
+
+react app
+
+tailwindcss,react router dom,react icons, firebase, framer motion
