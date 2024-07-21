@@ -2,41 +2,36 @@ import React from 'react'
 import { CgChevronRight } from 'react-icons/cg'
 import { GoogleAuthProvider, GithubAuthProvider, signInWithPopup, signInWithRedirect } from 'firebase/auth'
 import { auth } from '../config/firebase.config';
+import { useNavigate } from 'react-router-dom'
+
 
 const AuthBtnWithProvider = ({ Icon, lable, provider }) => {
+    const navigation = useNavigate()
 
     const googleAuthProvider = new GoogleAuthProvider();
     const githubAuthProvider = new GithubAuthProvider();
 
     const handleClick = async () => {
-        switch (provider) {
-            case "GoogleAuthProvider":
-                await signInWithPopup(auth, googleAuthProvider).then((res) => {
-
+        try {
+            let res;
+            switch (provider) {
+                case "GoogleAuthProvider":
+                    res = await signInWithRedirect(auth, googleAuthProvider);
                     console.log("GoogleAuthProvider :", res);
-                }).catch(err => {
-
-                    console.log(`Error : ${err.Message}`);
-                })
-                break;
-            case "GithubAuthProvider":
-                await signInWithRedirect(auth, githubAuthProvider).then((res) => {
-
+                    break;
+                case "GithubAuthProvider":
+                    res = await signInWithRedirect(auth, githubAuthProvider);
                     console.log("GithubAuthProvider :", res);
-                }).catch(err => {
-
-                    console.log(`Error : ${err.Message}`);
-                })
-                break;
-            default:
-                await signInWithPopup(auth, googleAuthProvider).then((res) => {
-
+                    break;
+                default:
+                    res = await signInWithRedirect(auth, googleAuthProvider);
                     console.log("GoogleAuthProvider :", res);
-                }).catch(err => {
-
-                    console.log(`Error : ${err.Message}`);
-                })
-                break;
+                    break;
+            }
+            // If sign-in is successful, navigate to the home page
+            navigate("/");
+        } catch (err) {
+            console.log(`Error : ${err.message}`);
         }
     }
 
