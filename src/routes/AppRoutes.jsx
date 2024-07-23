@@ -1,26 +1,23 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Authentication, HomeScreen } from '../pages';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { ReactQueryDevtools } from 'react-query/devtools';
 import { ToastContainer } from 'react-toastify';
+import { MainLoading } from '../components';
+import CreateTemplate from '../pages/CreateTemplate';
 
 const AppRoutes = () => {
-    const queryClient = new QueryClient(); // Create a QueryClient instance
 
     return (
-        <QueryClientProvider client={queryClient}> {/* Pass the instance here */}
-            <BrowserRouter>
-                <Suspense fallback={<div>Loading...</div>}>
-                    <Routes>
-                        <Route path='/' element={<HomeScreen />} />
-                        <Route path='/auth' element={<Authentication />} />
-                    </Routes>
-                </Suspense>
-            </BrowserRouter>
+        <BrowserRouter>
+            <Suspense fallback={<MainLoading />}>
+                <Routes>
+                    <Route path='/' element={<HomeScreen />} />
+                    <Route path='/auth' element={<Authentication />} />
+                    <Route path='/create/template' element={<CreateTemplate />} />
+                </Routes>
+            </Suspense>
             <ToastContainer />
-            <ReactQueryDevtools initialIsOpen={false} />
-        </QueryClientProvider>
+        </BrowserRouter>
     );
 }
 
