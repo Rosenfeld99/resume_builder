@@ -105,7 +105,7 @@ const useAuth = () => {
     };
 
 
-    return { currentUser, isLoading, handleSignup, handleRegisterWithGoogle, handleSignOut };
+    return { currentUser, isLoading, handleSignup, handleRegisterWithGoogle, handleSignOut,setCurrentUser };
 };
 
 export default useAuth;

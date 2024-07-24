@@ -183,7 +183,7 @@ const CreateTemplate = () => {
                     <div className=" p-2 w-full flex-1 grid grid-cols-2 h-full overflow-y-auto lg:grid-cols-3  gap-3">
                         {templates?.map((template, index) => (
                             <div key={template?.id} className=" px-8  py-5 rounded-md overflow-hidden  bg-gray-200 backdrop-blur-sm">
-                                <img className='aspect-[3/4] object-cover shadow-2xl' src={template?.imageURL} alt="" />
+                                <img className='aspect-[3/4] object-cover shadow-2xl' loading='lazy' src={template?.imageURL} alt="" />
                             </div>
                         ))}
                     </div>

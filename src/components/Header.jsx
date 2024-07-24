@@ -59,7 +59,7 @@ const Header = () => {
         {/* account */}
         <div onClick={() => setIsOpen(!isOpen)} >
           {currentUser?.photoURL ?
-            <img className="w-12 bg-gray-300 aspect-square rounded-md overflow-hidden cursor-pointer object-cover" src={currentUser?.photoURL} alt="Profile" />
+            <img loading='lazy' className="w-12 bg-gray-300 aspect-square rounded-md overflow-hidden cursor-pointer object-cover" src={currentUser?.photoURL} alt="Profile" />
             :
             <div className="w-12 bg-gray-300 h-12 flex items-center justify-center text-xl rounded-md overflow-hidden cursor-pointer">{currentUser?.displayName?.substring(0, 1)}</div>
           }
