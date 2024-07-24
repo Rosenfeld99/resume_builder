@@ -1,16 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import {MainLoading} from './';
+import { MainLoading } from './';
 import useAuth from '../hooks/useAuth';
+import useTemplate from '../hooks/useTemplate';
+import { FadeInOutWIthOpacity } from '../animations';
+import { IoCloseOutline } from 'react-icons/io5';
 
 const Header = () => {
-  const { isLoading, currentUser } = useAuth()
+  const { isLoading, currentUser, handleSignOut } = useAuth()
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const { handleSignOut } = useAuth()
+  const { currentTag, setCurrentTag } = useTemplate()
   const navigateion = useNavigate()
-//   console.log(currentUser);
+  //   console.log(currentUser);
   const dropdownVariants = {
     hidden: { opacity: 0, scale: 0.8, transformOrigin: 'top right' },
     visible: { opacity: 1, scale: 1, transformOrigin: 'top right' },
@@ -39,8 +42,19 @@ const Header = () => {
         {/* logo */}
         <div className="text-2xl font-bold">LOGO</div>
         {/* input */}
-        <div className="w-full flex-1">
-          <input className='w-full p-3 border-gray-300 border rounded-md' type="text" placeholder='Search ...' />
+        <div className="w-full flex-1 relative">
+          <input value={currentTag ? currentTag : ""} onChange={(e) => setCurrentTag(e.target.value)} className='w-full p-3 border-gray-300 border rounded-md outline-none' type="text" placeholder='Search ...' />
+
+          {/* clear btn */}
+          {currentTag?.length > 0 && <AnimatePresence>
+            <motion.div
+              {...FadeInOutWIthOpacity}
+              onClick={() => setCurrentTag(null)}
+              className=' absolute top-3 right-3 text-2xl text-gray-400 border-2 rounded-md border-gray-400'
+            >
+              <IoCloseOutline />
+            </motion.div>
+          </AnimatePresence>}
         </div>
         {/* account */}
         <div onClick={() => setIsOpen(!isOpen)} >
