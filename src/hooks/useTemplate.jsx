@@ -62,6 +62,7 @@ const useTemplate = () => {
 
   return {
     templates,
+    setTemplates,
     isLoadingTemplates,
     fetchTemplates,
     currentTag,

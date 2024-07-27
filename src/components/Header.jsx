@@ -50,7 +50,7 @@ const Header = () => {
             <motion.div
               {...FadeInOutWIthOpacity}
               onClick={() => setCurrentTag(null)}
-              className=' absolute top-3 right-3 text-2xl text-gray-400 border-2 rounded-md border-gray-400'
+              className=' absolute top-3 right-3 text-2xl z-50 text-gray-400 border-2 rounded-md border-gray-400'
             >
               <IoCloseOutline />
             </motion.div>
@@ -75,7 +75,7 @@ const Header = () => {
             exit="hidden"
             variants={dropdownVariants}
             transition={{ duration: 0.3 }}
-            className="absolute top-14 right-5 bg-white border border-gray-300 shadow-lg rounded-md"
+            className="absolute z-50 top-14 right-5 bg-white border border-gray-300 shadow-lg rounded-md"
             style={{ transformOrigin: 'top right' }}
           >
             <div className=" flex flex-col gap-5 items-center ">

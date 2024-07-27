@@ -32,7 +32,7 @@ const TemplateDesignPin = ({ item, index }) => {
                 <img src={item?.imageURL} loading='lazy' className=' w-full h-full object-cover' alt="" />
                 <AnimatePresence>
                     {isHoverdTemplate && <motion.div {...FadeInOutWIthOpacity}
-                        className=' absolute inset-0 bg-[rgba(0,0,0,0.4)] flex flex-col items-center justify-start px-4 py-3 z-50 cursor-pointer '
+                        className=' absolute inset-0 bg-[rgba(0,0,0,0.4)] flex flex-col items-center justify-start px-4 py-3 z-30 cursor-pointer '
                     >
                         <div className=" flex flex-col items-end justify-start w-full gap-8">
                             <InnerIconBox Icon={currentUser?.collections?.includes(item?.id) ? BiSolidFolderPlus : BiFolderPlus} label={currentUser?.collections?.includes(item?.id) ? "Remove from collections" : "Add to collections"} onAction={addToCollections} />

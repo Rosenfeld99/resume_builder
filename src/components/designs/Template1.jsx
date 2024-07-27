@@ -1,9 +1,6 @@
 
-import React, { useEffect, useRef, useState } from "react";
-import MainSpinner from "../MainSpinner";
-import { useQuery } from "react-query";
-import useUser from "../../hooks/useUser";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { toast } from "react-toastify";
 import { db } from "../../config/firebase.config";
@@ -11,139 +8,72 @@ import { getTemplateDetailEditByUser } from "../../api";
 import jsPDF from "jspdf";
 import * as htmlToImage from "html-to-image";
 
-import { TemplateOne } from "../../assets";
-import {
-  FaHouse,
-  FaTrash,
-  FaPenToSquare,
-  FaPencil,
-  FaPlus,
-} from "react-icons/fa6";
+import { FaHouse, FaTrash, FaPenToSquare, FaPencil, FaPlus, } from "react-icons/fa6";
 import { BiSolidBookmarks } from "react-icons/bi";
-import {
-  BsFiletypePdf,
-  BsFiletypePng,
-  BsFiletypeJpg,
-  BsFiletypeSvg,
-} from "react-icons/bs";
+import { BsFiletypePdf, BsFiletypePng, BsFiletypeJpg, BsFiletypeSvg, } from "react-icons/bs";
 
 import { AnimatePresence, motion } from "framer-motion";
 import { FadeInOutWIthOpacity, opacityINOut } from "../../animations";
+import MainLoading from "../MainLoading";
+import useUser from "../../hooks/userUser";
+import { educationDumy, experiencesDumy, formDataDumy, skillsDumy } from "../../utils/db/dataDumy";
 
 const Template1 = () => {
   const { pathname } = useLocation();
-  const location = useLocation();
   const navigate = useNavigate();
   const templateName = pathname?.split("/")?.slice(-1);
-  const searchParams = new URLSearchParams(location.search);
-  const loadedTemplateId = searchParams.get("templateId");
+  const [searchParams] = useSearchParams()
+  const loadedTemplateId = searchParams.get("templateID");
   // console.log(pathname, templateName, loadedTemplateId);
 
+
   const [isEdit, setIsEdit] = useState(false);
-  const { data: user } = useUser();
+  const { currentUser } = useUser();
 
   const resumeRef = useRef(null);
 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [formData, setFormData] = useState(formDataDumy || {});
+  const [experiences, setExperiences] = useState(experiencesDumy || []);
+  const [skills, setSkills] = useState(skillsDumy || []);
+  const [education, setEducation] = useState(educationDumy || []);
   const [imageAsset, setImageAsset] = useState({
     isImageLoading: false,
     imageURL: null,
   });
 
-  const {
-    data: resumeData,
-    isLoading: resume_isLoading,
-    isError: resume_isError,
-    refetch: refetch_resumeData,
-  } = useQuery(["templateEditedByUser", `${templateName}-${user?.uid}`], () =>
-    getTemplateDetailEditByUser(user?.uid, `${templateName}-${user?.uid}`)
-  );
+  const fetchData = useCallback(async () => {
+    if (!currentUser?.id || !templateName) return;
 
-  const [formData, setFormData] = useState({
-    fullname: "Karen Richards",
-    professionalTitle: "Professional Title",
-    personalDescription: `Lorem ipsum dolor sit, amet consectetur adipisicing elit. Alia minus est culpa id corrupti nobis ullam harum, porro veniam facilis, obcaecati nulla magnam beatae quae at eos! Qui, similique laboriosam?`,
-    refererName: "Sara Taylore",
-    refererRole: "Director | Company Name",
-    mobile: "+91 0000-0000",
-    email: "urname@gmail.com",
-    website: "urwebsite.com",
-    address: "your street address, ss, street, city/zip code - 1234",
-  });
-
-  const [experiences, setExperiences] = useState([
-    {
-      year: "2012 - 2014",
-      title: "Job Position Here",
-      companyAndLocation: "Company Name / Location here",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Corporis voluptatibus minima tenetur nostrum quo aliquam dolorum incidunt.",
-    },
-    {
-      year: "2012 - 2014",
-      title: "Job Position Here",
-      companyAndLocation: "Company Name / Location here",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Corporis voluptatibus minima tenetur nostrum quo aliquam dolorum incidunt.",
-    },
-    {
-      year: "2012 - 2014",
-      title: "Job Position Here",
-      companyAndLocation: "Company Name / Location here",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Corporis voluptatibus minima tenetur nostrum quo aliquam dolorum incidunt.",
-    },
-  ]);
-
-  const [skills, setSkills] = useState([
-    {
-      title: "skill1",
-      percentage: "75",
-    },
-    {
-      title: "skill2",
-      percentage: "75",
-    },
-    {
-      title: "skill3",
-      percentage: "75",
-    },
-    {
-      title: "skill4",
-      percentage: "75",
-    },
-    {
-      title: "skill5",
-      percentage: "75",
-    },
-  ]);
-
-  const [education, setEducation] = useState([
-    {
-      major: "ENTER YOUR MAJOR",
-      university: "Name of your university / college 2005-2009",
-    },
-  ]);
+    try {
+      const data = await getTemplateDetailEditByUser(currentUser.id, `${templateName}-${currentUser.id}`);
+      // console.log("Fetched data:", data);
+      if (data) {
+        setFormData(data.formData || formDataDumy || {});
+        setExperiences(data.experiences || experiencesDumy || []);
+        setSkills(data.skills || skillsDumy || []);
+        setEducation(data.education || educationDumy || []);
+        setImageAsset(prevAsset => ({
+          ...prevAsset,
+          imageURL: data.userProfilePic || null,
+        }));
+      }
+      setError(null)
+    } catch (error) {
+      console.error("Error fetching resume data:", error);
+      setError(`Error : ${error?.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }, [currentUser]);
 
   useEffect(() => {
-    if (resumeData?.formData) {
-      setFormData({ ...resumeData?.formData });
-    }
-    if (resumeData?.experiences) {
-      setExperiences(resumeData?.experiences);
-    }
-    if (resumeData?.skills) {
-      setSkills(resumeData?.skills);
-    }
-    if (resumeData?.education) {
-      setEducation(resumeData?.education);
-    }
-    if (resumeData?.userProfilePic) {
-      setImageAsset((prevAsset) => ({
-        ...prevAsset,
-        imageURL: resumeData?.userProfilePic,
-      }));
-    }
-  }, [resumeData]);
+    fetchData();
+  }, [fetchData]);
+
+
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -292,10 +222,10 @@ const Template1 = () => {
 
   const saveFormData = async () => {
     const timeStamp = serverTimestamp();
-    const resume_id = `${templateName}-${user?.uid}`;
+    const resume_id = `${templateName}-${currentUser?.id}`;
     const imageURL = await getImage();
     const _doc = {
-      _id: loadedTemplateId,
+      id: loadedTemplateId,
       resume_id,
       formData,
       education,
@@ -306,10 +236,9 @@ const Template1 = () => {
       imageURL,
     };
     console.log(_doc);
-    setDoc(doc(db, "users", user?.uid, "resumes", resume_id), _doc)
+    setDoc(doc(db, "users", currentUser?.id, "resumes", resume_id), _doc)
       .then(() => {
         toast.success(`Data Saved`);
-        refetch_resumeData();
       })
       .catch((err) => {
         toast.error(`Error : ${err.message}`);
@@ -338,17 +267,17 @@ const Template1 = () => {
     }
   };
 
-  const generatePDF = async () => {};
+  const generatePDF = async () => { };
 
-  const generateImage = async () => {};
+  const generateImage = async () => { };
 
-  const generatePng = async () => {};
+  const generatePng = async () => { };
 
-  const generateSvg = async () => {};
+  const generateSvg = async () => { };
 
-  if (resume_isLoading) return <MainSpinner />;
+  if (loading) return <MainLoading />;
 
-  if (resume_isError) {
+  if (error) {
     return (
       <div className="w-full h-[60vh] flex flex-col items-center justify-center">
         <p className="text-lg text-txtPrimary font-semibold">
@@ -430,7 +359,7 @@ const Template1 = () => {
                       <div className="w-full flex flex-col items-center justify-center h-full">
                         <div className="w-full flex flex-col justify-center items-center cursor-pointer">
                           <img
-                            src={TemplateOne}
+                            src={'https://images.pexels.com/photos/103123/pexels-photo-103123.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'}
                             className="w-full h-80 object-cover"
                             alt=""
                           />
@@ -488,16 +417,14 @@ const Template1 = () => {
                             name="major"
                             value={edu.major}
                             onChange={(e) => handleEducationChange(i, e)}
-                            className={`bg-transparent outline-none border-none text-sm font-semibold uppercase  text-gray-100  ${
-                              isEdit && "text-yellow-400 w-full"
-                            }`}
+                            className={`bg-transparent outline-none border-none text-sm font-semibold uppercase  text-gray-100  ${isEdit && "text-yellow-400 w-full"
+                              }`}
                           />
 
                           <textarea
                             readOnly="true"
-                            className={`text-xs text-gray-200 mt-2  w-full  outline-none border-none ${
-                              isEdit ? "bg-[#1c1c1c]" : "bg-transparent"
-                            }`}
+                            className={`text-xs text-gray-200 mt-2  w-full  outline-none border-none ${isEdit ? "bg-[#1c1c1c]" : "bg-transparent"
+                              }`}
                             name="university"
                             value={edu.university}
                             onChange={(e) => handleEducationChange(i, e)}
@@ -549,9 +476,8 @@ const Template1 = () => {
                       name="refererName"
                       type="text"
                       readOnly="true"
-                      className={`bg-transparent outline-none border-none text-base tracking-widest capitalize text-gray-100 w-full ${
-                        isEdit && "bg-[#1c1c1c]"
-                      }`}
+                      className={`bg-transparent outline-none border-none text-base tracking-widest capitalize text-gray-100 w-full ${isEdit && "bg-[#1c1c1c]"
+                        }`}
                     />
 
                     <input
@@ -560,9 +486,8 @@ const Template1 = () => {
                       name="refererRole"
                       type="text"
                       readOnly="true"
-                      className={`bg-transparent outline-none border-none text-xs capitalize text-gray-300 w-full ${
-                        isEdit && "bg-[#1c1c1c]"
-                      }`}
+                      className={`bg-transparent outline-none border-none text-xs capitalize text-gray-300 w-full ${isEdit && "bg-[#1c1c1c]"
+                        }`}
                     />
                   </div>
                 </div>
@@ -583,9 +508,8 @@ const Template1 = () => {
                       name="mobile"
                       type="text"
                       readOnly="true"
-                      className={`bg-transparent outline-none border-none text-xs px-3 mt-2 text-gray-200 w-full ${
-                        isEdit && "bg-[#1c1c1c]"
-                      }`}
+                      className={`bg-transparent outline-none border-none text-xs px-3 mt-2 text-gray-200 w-full ${isEdit && "bg-[#1c1c1c]"
+                        }`}
                     />
                   </div>
                 </div>
@@ -605,9 +529,8 @@ const Template1 = () => {
                       name="email"
                       type="text"
                       readOnly="true"
-                      className={`bg-transparent outline-none border-none text-xs px-3 mt-2 text-gray-200 w-full ${
-                        isEdit && "bg-[#1c1c1c]"
-                      }`}
+                      className={`bg-transparent outline-none border-none text-xs px-3 mt-2 text-gray-200 w-full ${isEdit && "bg-[#1c1c1c]"
+                        }`}
                     />
                   </div>
                 </div>
@@ -628,9 +551,8 @@ const Template1 = () => {
                       name="website"
                       type="text"
                       readOnly="true"
-                      className={`bg-transparent outline-none border-none text-xs px-3 mt-2 text-gray-200 w-full ${
-                        isEdit && "bg-[#1c1c1c]"
-                      }`}
+                      className={`bg-transparent outline-none border-none text-xs px-3 mt-2 text-gray-200 w-full ${isEdit && "bg-[#1c1c1c]"
+                        }`}
                     />
                   </div>
                 </div>
@@ -647,9 +569,8 @@ const Template1 = () => {
 
                     <textarea
                       readOnly="true"
-                      className={`text-xs text-gray-200 mt-2 px-3  w-full  outline-none border-none ${
-                        isEdit ? "bg-[#1c1c1c]" : "bg-transparent"
-                      }`}
+                      className={`text-xs text-gray-200 mt-2 px-3  w-full  outline-none border-none ${isEdit ? "bg-[#1c1c1c]" : "bg-transparent"
+                        }`}
                       name="address"
                       value={formData.address}
                       onChange={handleChange}
@@ -675,9 +596,8 @@ const Template1 = () => {
                     name="fullname"
                     value={formData.fullname}
                     onChange={handleChange}
-                    className={`bg-transparent outline-none border-none text-3xl font-sans uppercase tracking-wider text-txtDark font-extrabold ${
-                      isEdit && "text-white w-full"
-                    }`}
+                    className={`bg-transparent outline-none border-none text-3xl font-sans uppercase tracking-wider text-txtDark font-extrabold ${isEdit && "text-white w-full"
+                      }`}
                   />
                 </div>
 
@@ -687,9 +607,8 @@ const Template1 = () => {
                   name="professionalTitle"
                   type="text"
                   readOnly="true"
-                  className={`bg-transparent outline-none border-none text-xl tracking-widest uppercase text-txtPrimary w-full ${
-                    isEdit && "text-white"
-                  }`}
+                  className={`bg-transparent outline-none border-none text-xl tracking-widest uppercase text-txtPrimary w-full ${isEdit && "text-white"
+                    }`}
                 />
               </div>
 
@@ -700,9 +619,8 @@ const Template1 = () => {
                   <div className="w-full h-1 bg-txtDark my-3"></div>
                   <textarea
                     readOnly="true"
-                    className={`text-base text-txtPrimary tracking-wider w-full  outline-none border-none ${
-                      isEdit ? "bg-gray-200" : "bg-transparent"
-                    }`}
+                    className={`text-base text-txtPrimary tracking-wider w-full  outline-none border-none ${isEdit ? "bg-gray-200" : "bg-transparent"
+                      }`}
                     name="personalDescription"
                     value={formData.personalDescription}
                     onChange={handleChange}
@@ -738,9 +656,8 @@ const Template1 = () => {
                                 name="year"
                                 type="text"
                                 readOnly="true"
-                                className={` outline-none border-none text-base tracking-eide uppercase text-txtDark w-full ${
-                                  isEdit ? "bg-gray-200" : "bg-transparent"
-                                }`}
+                                className={` outline-none border-none text-base tracking-eide uppercase text-txtDark w-full ${isEdit ? "bg-gray-200" : "bg-transparent"
+                                  }`}
                               />
                             </div>
                             <div className="col-span-8 relative">
@@ -761,9 +678,8 @@ const Template1 = () => {
                                 name="title"
                                 type="text"
                                 readOnly="true"
-                                className={` outline-none border-none font-sans text-lg tracking-wide capitalize text-txtDark w-full ${
-                                  isEdit ? "bg-gray-200" : "bg-transparent"
-                                }`}
+                                className={` outline-none border-none font-sans text-lg tracking-wide capitalize text-txtDark w-full ${isEdit ? "bg-gray-200" : "bg-transparent"
+                                  }`}
                               />
 
                               <input
@@ -772,16 +688,14 @@ const Template1 = () => {
                                 name="companyAndLocation"
                                 type="text"
                                 readOnly="true"
-                                className={` outline-none border-none text-sm tracking-wide capitalize text-txtPrimary w-full ${
-                                  isEdit ? "bg-gray-200" : "bg-transparent"
-                                }`}
+                                className={` outline-none border-none text-sm tracking-wide capitalize text-txtPrimary w-full ${isEdit ? "bg-gray-200" : "bg-transparent"
+                                  }`}
                               />
 
                               <textarea
                                 readOnly="true"
-                                className={`text-xs mt-4  text-txtPrimary tracking-wider w-full  outline-none border-none ${
-                                  isEdit ? "bg-gray-200" : "bg-transparent"
-                                }`}
+                                className={`text-xs mt-4  text-txtPrimary tracking-wider w-full  outline-none border-none ${isEdit ? "bg-gray-200" : "bg-transparent"
+                                  }`}
                                 name="description"
                                 value={exp.description}
                                 onChange={(e) => handleExpChange(i, e)}
@@ -832,9 +746,8 @@ const Template1 = () => {
                                   name="title"
                                   type="text"
                                   readOnly="true"
-                                  className={` outline-none border-none text-base tracking-wide capitalize font-semibold text-txtPrimary w-full ${
-                                    isEdit ? "bg-gray-200" : "bg-transparent"
-                                  }`}
+                                  className={` outline-none border-none text-base tracking-wide capitalize font-semibold text-txtPrimary w-full ${isEdit ? "bg-gray-200" : "bg-transparent"
+                                    }`}
                                 />
 
                                 <AnimatePresence>
@@ -845,11 +758,10 @@ const Template1 = () => {
                                       onChange={(e) => handleSkillsChange(i, e)}
                                       name="percentage"
                                       type="text"
-                                      className={` outline-none border-none text-base tracking-wide capitalize font-semibold text-txtPrimary w-full ${
-                                        isEdit
-                                          ? "bg-gray-200"
-                                          : "bg-transparent"
-                                      }`}
+                                      className={` outline-none border-none text-base tracking-wide capitalize font-semibold text-txtPrimary w-full ${isEdit
+                                        ? "bg-gray-200"
+                                        : "bg-transparent"
+                                        }`}
                                     />
                                   )}
                                 </AnimatePresence>
@@ -904,10 +816,4 @@ const Template1 = () => {
 };
 
 export default Template1;
-
-
-
-// --------------------------------------------------------------------------------
-// yarn add jspdf html-to-image
-
 
