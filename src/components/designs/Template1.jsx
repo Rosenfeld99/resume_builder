@@ -267,13 +267,90 @@ const Template1 = () => {
     }
   };
 
-  const generatePDF = async () => { };
+  const generatePDF = async () => {
+    const element = resumeRef.current;
+    if (!element) {
+      return toast.info("Failed to get document");
+    }
 
-  const generateImage = async () => { };
+    try {
+      const dataUrl = await htmlToImage.toPng(element);
+      const pdf = new jsPDF({
+        orientation: "p",
+        unit: "mm",
+        format: "a4"
+      });
 
-  const generatePng = async () => { };
+      const imgProps = pdf.getImageProperties(dataUrl);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pdfWidth;
+      const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-  const generateSvg = async () => { };
+      // const verticalMargin = (pdfHeight - imgHeight) / 2;
+
+      pdf.addImage(dataUrl, "PNG", 0, 0, imgWidth, imgHeight);
+      pdf.save(`${currentUser?.displayName}_resume.pdf`);
+    } catch (err) {
+      toast.error(`Error: ${err?.message}`);
+    }
+  };
+
+
+  const generateImage = async () => {
+    const element = resumeRef.current;
+    if (!element) {
+      return toast.info("Failed to get document");
+    }
+
+    try {
+      htmlToImage.toJpeg(element).then((dataUrl) => {
+        const a = document.createElement('a')
+        a.href = dataUrl
+        a.download = `${currentUser?.displayName}_resume.jpeg`
+        a.click()
+      })
+    } catch (err) {
+      toast.error(`Error: ${err?.message}`);
+    }
+  };
+
+  const generatePng = async () => {
+    const element = resumeRef.current;
+    if (!element) {
+      return toast.info("Failed to get document");
+    }
+
+    try {
+      htmlToImage.toPng(element).then((dataUrl) => {
+        const a = document.createElement('a')
+        a.href = dataUrl
+        a.download = `${currentUser?.displayName}_resume.png`
+        a.click()
+      })
+    } catch (err) {
+      toast.error(`Error: ${err?.message}`);
+    }
+
+  };
+
+  const generateSvg = async () => {
+    const element = resumeRef.current;
+    if (!element) {
+      return toast.info("Failed to get document");
+    }
+
+    try {
+      htmlToImage.toSvg(element).then((dataUrl) => {
+        const a = document.createElement('a')
+        a.href = dataUrl
+        a.download = `${currentUser?.displayName}_resume.svg`
+        a.click()
+      })
+    } catch (err) {
+      toast.error(`Error: ${err?.message}`);
+    }
+  };
 
   if (loading) return <MainLoading />;
 

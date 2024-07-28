@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { MainLoading } from './';
 import useAuth from '../hooks/useAuth';
 import useTemplate from '../hooks/useTemplate';
@@ -38,9 +38,11 @@ const Header = () => {
 
   return (
     <div>
-      <header className='px-5 py-2 flex items-center gap-4 justify-between sticky top-0 bg-white'>
+      <header className='px-5 py-2 flex items-center gap-4 justify-between sticky z-50 top-0 bg-white'>
         {/* logo */}
-        <div className="text-2xl font-bold">LOGO</div>
+        <Link to={'/'}>
+          <div className="text-2xl font-bold">LOGO</div>
+        </Link>
         {/* input */}
         <div className="w-full flex-1 relative">
           <input value={currentTag ? currentTag : ""} onChange={(e) => setCurrentTag(e.target.value)} className='w-full p-3 border-gray-300 border rounded-md outline-none' type="text" placeholder='Search ...' />
@@ -63,40 +65,42 @@ const Header = () => {
             :
             <div className="w-12 bg-gray-300 h-12 flex items-center justify-center text-xl rounded-md overflow-hidden cursor-pointer">{currentUser?.displayName?.substring(0, 1)}</div>
           }
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div
+                ref={dropdownRef}
+                initial="hidden"
+                animate="visible"
+                exit="hidden"
+                variants={dropdownVariants}
+                transition={{ duration: 0.3 }}
+                className="absolute z-50 top-14 right-5 bg-white border border-gray-300 shadow-lg rounded-md"
+                style={{ transformOrigin: 'top right' }}
+              >
+                <div className=" flex flex-col gap-5 items-center ">
+                  <div className=' flex flex-col gap-2 items-center px-7 py-5 border-b' >
+                    {currentUser?.photoURL ?
+                      <img className="w-20 aspect-square rounded-full overflow-hidden cursor-pointer bg-gray-300 " src={currentUser?.photoURL} alt="Profile" />
+                      : <div className="w-20 h-20 flex items-center justify-center text-3xl rounded-full overflow-hidden cursor-pointer bg-gray-300 ">{currentUser?.displayName?.substring(0, 1)}</div>}
+                    <p className=' text-sm font-semibold'>{currentUser?.displayName}</p>
+                  </div>
+                  <div className=' flex flex-col gap-4 capitalize items-start w-full px-7 text-gray-400'  >
+                    <Link to={`/profile/${currentUser?.id}`}>
+                      <p className='hover:text-black hover:underline '>My Account</p>
+                    </Link>
+                    <p className='hover:text-black hover:underline '>Add new template</p>
+                    <p className='hover:text-black hover:underline '>Switch Theme</p>
+                  </div>
+                  <button onClick={() => handleSignOut(navigateion)} className=' py-3 border-t w-full text-gray-400 hover:text-black flex flex-col gap-2 items-center'  >
+                    <p>Signout</p>
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </header>
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            ref={dropdownRef}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            variants={dropdownVariants}
-            transition={{ duration: 0.3 }}
-            className="absolute z-50 top-14 right-5 bg-white border border-gray-300 shadow-lg rounded-md"
-            style={{ transformOrigin: 'top right' }}
-          >
-            <div className=" flex flex-col gap-5 items-center ">
-              <div className=' flex flex-col gap-2 items-center px-7 py-5 border-b' >
-                {currentUser?.photoURL ?
-                  <img className="w-20 aspect-square rounded-full overflow-hidden cursor-pointer bg-gray-300 " src={currentUser?.photoURL} alt="Profile" />
-                  : <div className="w-20 h-20 flex items-center justify-center text-3xl rounded-full overflow-hidden cursor-pointer bg-gray-300 ">{currentUser?.displayName?.substring(0, 1)}</div>}
-                <p className=' text-sm font-semibold'>{currentUser?.displayName}</p>
-              </div>
-              <div className=' flex flex-col gap-4 capitalize items-start w-full px-7 text-gray-400'  >
-                <p className='hover:text-black hover:underline '>My Account</p>
-                <p className='hover:text-black hover:underline '>Add new template</p>
-                <p className='hover:text-black hover:underline '>Switch Theme</p>
-              </div>
-              <button onClick={() => handleSignOut(navigateion)} className=' py-3 border-t w-full text-gray-400 hover:text-black flex flex-col gap-2 items-center'  >
-                <p>Signout</p>
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };
