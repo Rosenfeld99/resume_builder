@@ -12,18 +12,18 @@ const HomeScreen = () => {
     <div>
       {/* header */}
       <Header />
-      <div className=" w-full px-4 py-6 flex-col flex items-center justify-center">
+      <div className=" w-full md:py-5 flex-col flex items-center justify-center ">
         {/* filter section */}
-        <Filters />
+          <Filters />
 
         {/* resume list */}
         {isError ? <React.Fragment>
-          <p className=' text-lg text-gray-700'>
+          <p className=' text-lg text-gray-700 px-4 md:px-10 lg:px-0'>
             Somthing went worng.. try agen later
           </p>
         </React.Fragment> :
           <React.Fragment>
-            <div className=" w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3">
+            <div className=" w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 px-4 md:px-10 lg:px-0 gap-3">
               <RenderTemplate templates={templates} />
             </div>
           </React.Fragment>}

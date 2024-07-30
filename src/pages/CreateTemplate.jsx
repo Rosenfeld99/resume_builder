@@ -131,7 +131,7 @@ const CreateTemplate = () => {
     return (
         <div>
             <Header />
-            <div className=" md:px-10 md:py-5 p-5">
+            <div className=" py-2 md:py-5">
 
                 <h3 className=' text-md capitalize '>create a new template</h3>
                 {/* main section */}
@@ -180,9 +180,9 @@ const CreateTemplate = () => {
                     </div>
 
                     {/* right section */}
-                    <div className=" p-2 w-full flex-1 grid grid-cols-2 h-full overflow-y-auto lg:grid-cols-3  gap-3">
+                    <div className=" w-full flex-1 grid grid-cols-2 h-full overflow-y-auto gap-3">
                         {templates?.map((template, index) => (
-                            <div key={template?.id} className=" px-8  py-5 rounded-md overflow-hidden  bg-gray-200 backdrop-blur-sm">
+                            <div key={template?.id} className=" px-8 py-5 rounded-md overflow-hidden  bg-gray-200 backdrop-blur-sm">
                                 <img className='aspect-[3/4] object-cover shadow-2xl' loading='lazy' src={template?.imageURL} alt="" />
                             </div>
                         ))}

@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import Header from '../components/Header';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import useTemplate from '../hooks/useTemplate';
 import { MainLoading, TemplateDesignPin } from '../components';
 import { FaHome } from 'react-icons/fa';
@@ -10,8 +10,9 @@ import { AnimatePresence } from 'framer-motion';
 
 const TemplateDetail = () => {
   const { currentUser, saveToCollections, saveToFavouries } = useUser();
-  const { fetchSingleTemplateByID, templates, isLoadingSingleTemplate, templateSingle, setTemplateSingle } = useTemplate();
+  const { fetchSingleTemplateByID, templates, isLoadingSingleTemplate, templateSingle, setTemplateSingle, handleDeleteTemplate } = useTemplate();
   const { templateID } = useParams();
+  const navigation = useNavigate()
 
   useEffect(() => {
     if (templateID) {
@@ -26,6 +27,11 @@ const TemplateDetail = () => {
   const addToFavorite = useCallback(async () => {
     await saveToFavouries(templateSingle);
   }, [saveToFavouries, templateSingle]);
+
+  const deleteTemplate = useCallback(async (tempId) => {
+    await handleDeleteTemplate(tempId);
+    navigation(-1)
+  }, []);
 
   if (isLoadingSingleTemplate) {
     return <MainLoading />;
@@ -46,9 +52,8 @@ const TemplateDetail = () => {
             <p>{templateSingle.name}</p>
           </div>
 
-
           <div className="w-full grid grid-cols-3 gap-4 h-full">
-            <div className="col-span-2 overflow-hidden h-full min-h-[50vh] flex-1">
+            <div className="md:col-span-2 col-span-full overflow-hidden h-full min-h-[50vh] flex-1">
               <img className='aspect-[3/4] object-cover rounded-md bg-gray-200' loading='lazy' src={templateSingle?.imageURL} alt="" />
               {/* title and other option */}
               <div className="flex items-center justify-between w-full">
@@ -79,7 +84,7 @@ const TemplateDetail = () => {
             </div>
 
             {/* right section  */}
-            <div className=" flex flex-col items-center gap-4 mr-4">
+            <div className=" flex flex-col items-center md:col-span-1 col-span-full gap-4 mr-4">
               <div className="h-72 relative bg-gray-200 w-full rounded-md" style={{ background: 'url("https://images.pexels.com/photos/409696/pexels-photo-409696.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1")', backgroundPosition: "center", backgroundSize: "cover", }}>
                 <div className=" flex items-center justify-center h-full bg-[#00000051]">
                   <Link to={'/'}>
@@ -90,14 +95,22 @@ const TemplateDetail = () => {
                 </div>
               </div>
 
-              {/* Edit this template */}
-              {currentUser &&
-                <Link className=' w-full' to={`/resume/${templateSingle?.name}?templateID=${templateSingle?.id}`}>
-                  <button className=' bg-emerald-600 w-full rounded-md text-white text-xl p-3'>
-                    Edit this template
+              <div className=" flex items-center md:flex-col w-full gap-3">
+                {/* Edit this template */}
+                {currentUser &&
+                  <Link className=' w-full' to={`/resume/${templateSingle?.name}?templateID=${templateSingle?.id}`}>
+                    <button className=' bg-emerald-600 w-full rounded-md text-white text-xl p-3'>
+                      Get template
+                    </button>
+                  </Link>
+                }
+                {/* Delete this template */}
+                {currentUser?.role == "admin" &&
+                  <button onClick={() => deleteTemplate(templateSingle?.id)} className=' bg-red-600 w-full rounded-md text-white text-xl p-3'>
+                    Delete template
                   </button>
-                </Link>
-              }
+                }
+              </div>
 
               {/* tags section */}
               <div className=" flex items-center flex-wrap gap-3">

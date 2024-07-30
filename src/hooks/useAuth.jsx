@@ -23,15 +23,19 @@ const useAuth = () => {
     }, [setCurrentUser, setIsLoading]);
 
     const getUserExists = async (user, setCurrentUser) => {
-        const docRef = doc(db, "users", user.uid);
+        const docRef = doc(db, "users", user?.uid);
+        console.log(docRef);
         try {
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
                 setCurrentUser(docSnap.data());
-                return true
+                return true;
+            } else {
+                return false;
             }
         } catch (error) {
             console.error("Error fetching user document:", error);
+            return false;
         } finally {
             setIsLoading(false);
         }
@@ -105,7 +109,7 @@ const useAuth = () => {
     };
 
 
-    return { currentUser, isLoading, handleSignup, handleRegisterWithGoogle, handleSignOut,setCurrentUser };
+    return { currentUser, isLoading,getUserExists, handleSignup, handleRegisterWithGoogle, handleSignOut,setCurrentUser };
 };
 
 export default useAuth;

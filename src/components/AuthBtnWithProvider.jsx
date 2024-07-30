@@ -6,23 +6,30 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import useAuth from '../hooks/useAuth';
 
-const AuthBtnWithProvider = ({ Icon, label, provider,isSignin }) => {
+const AuthBtnWithProvider = ({ Icon, label, provider, isSignin, setIsSignin }) => {
     const navigate = useNavigate();
-    const {currentUser,handleRegisterWithGoogle} = useAuth()
+    const { currentUser,setCurrentUser, handleRegisterWithGoogle, getUserExists } = useAuth()
 
     const handleClick = async () => {
         if (isSignin) {
             const authProvider = provider === 'GoogleAuthProvider' ? new GoogleAuthProvider() : new GithubAuthProvider();
-    
+
             try {
-                await signInWithPopup(auth, authProvider);
-    
-                toast.success(`Signed in with ${provider}`);
-                navigate('/');
+                const userCredential = await signInWithPopup(auth, authProvider);
+                const user = userCredential.user;
+
+                if (await getUserExists(user, setCurrentUser)) {
+                    toast.success(`Signed in with Google`);
+                    navigate('/');
+                } else {
+                    toast.info(`You need to Signup`);
+                    setIsSignin(false);
+                    navigate('/auth');
+                }
             } catch (error) {
                 toast.error(`Error signing in with ${provider}: ${error.message}`);
             }
-        }else{
+        } else {
             handleRegisterWithGoogle(navigate)
         }
     };

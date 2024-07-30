@@ -4,11 +4,14 @@ import App from './App.jsx'
 import './index.css'
 import { AuthContextProvider } from './context/AuthContext.jsx'
 import { TemplateContextProvider } from './context/TemplateContext.jsx'
+import { ResumeContextProvider } from './context/ResumeContext.jsx'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <TemplateContextProvider>
-    <AuthContextProvider>
-      <App />
-    </AuthContextProvider>
+    <ResumeContextProvider>
+      <AuthContextProvider>
+        <App />
+      </AuthContextProvider>
+    </ResumeContextProvider>
   </TemplateContextProvider>
 )

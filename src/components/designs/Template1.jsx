@@ -296,7 +296,6 @@ const Template1 = () => {
     }
   };
 
-
   const generateImage = async () => {
     const element = resumeRef.current;
     if (!element) {
@@ -366,7 +365,7 @@ const Template1 = () => {
   return (
     <div className="w-full flex flex-col items-center justify-start gap-4">
       {/* bread crump */}
-      <div className="w-full flex items-center gap-2 px-4">
+      <div className="w-full flex items-center gap-2 px-2 lg:px-16">
         <Link
           to={"/"}
           className="flex items-center justify-center gap-2 text-txtPrimary"
@@ -383,10 +382,12 @@ const Template1 = () => {
         <p>Edit</p>
       </div>
 
-      <div className="w-full lg:w-[1200px] grid grid-cols-1 lg:grid-cols-12 px-6 lg:px-32">
+      <div className="w-full overflow-x-hidden lg:w-[1200px] grid grid-cols-1 lg:grid-cols-12 px-2 lg:px-32">
         {/* template design */}
-        <div className="col-span-12 px-4 py-6">
-          <div className="flex items-center justify-end w-full gap-12 mb-4">
+        <div className="col-span-12 md:px-4 py-6">
+
+          {/* Download options */}
+          <div className="flex items-center px-4 justify-end w-full md:gap-12 gap-3 sm:gap-6 mb-4">
             <div
               className="flex items-center justify-center gap-1 px-3 py-1 rounded-md bg-gray-200 cursor-pointer"
               onClick={toggleEditable}
@@ -427,16 +428,20 @@ const Template1 = () => {
               />
             </div>
           </div>
+
           <div className="w-full h-auto grid grid-cols-12" ref={resumeRef}>
-            <div className="col-span-4 bg-black flex flex-col items-center justify-start">
-              <div className="w-full h-80 bg-gray-300 flex items-center justify-center">
+           
+            <div className="md:col-span-4 col-span-full bg-black flex flex-col items-center justify-start">
+
+              {/* image setion */}
+              <div className="w-full md:h-80 bg-gray-300 flex items-center justify-center">
                 {!imageAsset.imageURL ? (
                   <React.Fragment>
                     <label className=" w-full cursor-pointer h-full">
                       <div className="w-full flex flex-col items-center justify-center h-full">
                         <div className="w-full flex flex-col justify-center items-center cursor-pointer">
                           <img
-                            src={'https://images.pexels.com/photos/103123/pexels-photo-103123.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'}
+                            src={'https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'}
                             className="w-full h-80 object-cover"
                             alt=""
                           />
@@ -474,6 +479,7 @@ const Template1 = () => {
                 )}
               </div>
 
+              {/* educations */}
               <div className="w-full flex flex-col items-center justify-start pl-8 mt-4 gap-6">
                 <div className="w-full">
                   <p className="uppercase text-lg font-semibold text-gray-100">
@@ -569,7 +575,8 @@ const Template1 = () => {
                   </div>
                 </div>
               </div>
-
+              
+              {/* prefomence */}
               <div className="w-full flex flex-col items-start justify-start mt-6 gap-6">
                 <div className="w-full grid grid-cols-12">
                   <div className="col-span-3 w-full h-6 bg-yellow-400"></div>
@@ -661,8 +668,10 @@ const Template1 = () => {
                   </div>
                 </div>
               </div>
+              
             </div>
-            <div className="col-span-8 flex flex-col items-center justify-start py-6 bg-white">
+
+            <div className="md:col-span-8 col-span-full flex flex-col items-center justify-start py-6 bg-white">
               <div className="w-full py-6"></div>
               {/* title */}
               <div className="w-full px-8 py-6 bg-yellow-500">

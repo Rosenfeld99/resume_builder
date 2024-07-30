@@ -1,6 +1,6 @@
 import { useContext, useEffect, useCallback } from 'react';
 import { TemplateContext } from '../context/TemplateContext';
-import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDoc, getDocs } from 'firebase/firestore';
 import { db } from '../config/firebase.config';
 import { toast } from 'react-toastify';
 
@@ -37,7 +37,24 @@ const useTemplate = () => {
     } finally {
       setIsLoadingTemplates(false);
     }
-  }, [setIsLoadingTemplates, setTemplates, setIsError]);
+  }, []);
+
+  // Function to delete a template by ID
+const handleDeleteTemplate = useCallback(async (templateId) => {
+  setIsLoadingTemplates(true);
+  try {
+    const templateDocRef = doc(db, 'templates', templateId);
+    await deleteDoc(templateDocRef);
+    setTemplates((prevTemplates) => prevTemplates.filter(template => template.id !== templateId));
+    toast.success(`Template deleted`);
+  } catch (error) {
+    console.error('Error deleting template:', error);
+    toast.error(`Error: ${error.message}`);
+    setIsError(true);
+  } finally {
+    setIsLoadingTemplates(false);
+  }
+}, [db]);
 
   // Use useCallback to memoize the function
   const fetchSingleTemplateByID = useCallback(async (templateID) => {
@@ -74,6 +91,7 @@ const useTemplate = () => {
     setTemplateSingle,
     isLoadingSingleTemplate,
     setIsLoadingSingleTemplate,
+    handleDeleteTemplate,
   };
 };
 

@@ -10,7 +10,7 @@ const Filters = () => {
     const { currentTag, setCurrentTag } = useTemplate()
 
     return (
-        <div className='w-full flex items-center justify-start py-4'>
+        <div className='w-full flex items-center justify-start py-4 pl-4 md:pl-10 lg:pl-0'>
             <div onClick={() => setCurrentTag(null)} className=" border border-gray-300 rounded-md bg-gray-200 relative px-3 py-2 mr-2 cursor-pointer group hover:shadow-md "
                 onMouseEnter={() => setIsClearHover(true)}
                 onMouseLeave={() => setIsClearHover(false)}

@@ -41,7 +41,9 @@ const Header = () => {
       <header className='px-5 py-2 flex items-center gap-4 justify-between sticky z-50 top-0 bg-white'>
         {/* logo */}
         <Link to={'/'}>
-          <div className="text-2xl font-bold">LOGO</div>
+          {/* <div className="text-2xl font-bold">LOGO</div> */}
+          <img className=' w-10' loading='lazy' src="/logo_resume_builders.png" alt="logo resume builder" />
+
         </Link>
         {/* input */}
         <div className="w-full flex-1 relative">
@@ -60,11 +62,13 @@ const Header = () => {
         </div>
         {/* account */}
         <div onClick={() => setIsOpen(!isOpen)} >
-          {currentUser?.photoURL ?
-            <img loading='lazy' className="w-12 bg-gray-300 aspect-square rounded-md overflow-hidden cursor-pointer object-cover" src={currentUser?.photoURL} alt="Profile" />
-            :
-            <div className="w-12 bg-gray-300 h-12 flex items-center justify-center text-xl rounded-md overflow-hidden cursor-pointer">{currentUser?.displayName?.substring(0, 1)}</div>
-          }
+          <React.Fragment>
+            {currentUser?.id ? <React.Fragment>{currentUser?.photoURL ?
+              <img loading='lazy' className="w-12 bg-gray-300 aspect-square rounded-md overflow-hidden cursor-pointer object-cover" src={currentUser?.photoURL} alt="Profile" />
+              :
+              <div className="w-12 bg-gray-300 h-12 flex items-center justify-center text-xl rounded-md overflow-hidden cursor-pointer">{currentUser?.displayName?.substring(0, 1)}</div>
+            }</React.Fragment> : <button onClick={()=>navigateion('/auth')} className=' w-full p-3 border-gray-300 border rounded-md active:scale-100 duration-150'>Login</button>}
+          </React.Fragment>
           <AnimatePresence>
             {isOpen && (
               <motion.div
@@ -88,7 +92,9 @@ const Header = () => {
                     <Link to={`/profile/${currentUser?.id}`}>
                       <p className='hover:text-black hover:underline '>My Account</p>
                     </Link>
-                    <p className='hover:text-black hover:underline '>Add new template</p>
+                    <Link to={`/create/template`}>
+                      <p className='hover:text-black hover:underline '>Add new template</p>
+                    </Link>
                     <p className='hover:text-black hover:underline '>Switch Theme</p>
                   </div>
                   <button onClick={() => handleSignOut(navigateion)} className=' py-3 border-t w-full text-gray-400 hover:text-black flex flex-col gap-2 items-center'  >

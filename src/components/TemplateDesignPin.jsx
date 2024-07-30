@@ -3,7 +3,6 @@ import React, { useState } from 'react'
 import { FadeInOutWIthOpacity, scaleInOut } from '../animations'
 import { BiFolderPlus, BiHeart, BiSolidFolderPlus, BiSolidHeart } from 'react-icons/bi'
 import userUser from '../hooks/userUser'
-import useUser from '../hooks/userUser'
 import { useNavigate } from 'react-router-dom'
 
 const TemplateDesignPin = ({ item, index }) => {
@@ -29,7 +28,7 @@ const TemplateDesignPin = ({ item, index }) => {
                 onMouseEnter={() => setIsHoverdTemplate(true)}
                 onMouseLeave={() => setIsHoverdTemplate(false)}
             >
-                <img src={item?.imageURL} loading='lazy' className=' w-full h-full object-cover' alt="" />
+                <img loading='lazy' src={item?.imageURL} className=' w-full h-full object-cover' alt="" />
                 <AnimatePresence>
                     {isHoverdTemplate && <motion.div {...FadeInOutWIthOpacity}
                         className=' absolute inset-0 bg-[rgba(0,0,0,0.4)] flex flex-col items-center justify-start px-4 py-3 z-30 cursor-pointer '
