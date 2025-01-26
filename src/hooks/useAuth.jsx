@@ -23,15 +23,19 @@ const useAuth = () => {
     }, [setCurrentUser, setIsLoading]);
 
     const getUserExists = async (user, setCurrentUser) => {
-        const docRef = doc(db, "users", user.uid);
+        const docRef = doc(db, "users", user?.uid);
+        console.log(docRef);
         try {
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
                 setCurrentUser(docSnap.data());
-                return true
+                return true;
+            } else {
+                return false;
             }
         } catch (error) {
             console.error("Error fetching user document:", error);
+            return false;
         } finally {
             setIsLoading(false);
         }
@@ -48,6 +52,8 @@ const useAuth = () => {
                 photoURL: data.photoURL || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png",
                 role: "user",
                 timeStamp: serverTimestamp(),
+                collections: [],
+                id: res.user.uid
             });
             navigate('/login');
         } catch (err) {
@@ -71,6 +77,8 @@ const useAuth = () => {
                     photoURL: user.photoURL,
                     role: "user",
                     date: serverTimestamp(),
+                    collections: [],
+                    id: user?.uid
                 });
                 toast.success(`Signup with Google ;)`);
                 navigate('/');
@@ -101,7 +109,7 @@ const useAuth = () => {
     };
 
 
-    return { currentUser, isLoading, handleSignup, handleRegisterWithGoogle, handleSignOut };
+    return { currentUser, isLoading,getUserExists, handleSignup, handleRegisterWithGoogle, handleSignOut,setCurrentUser };
 };
 
 export default useAuth;

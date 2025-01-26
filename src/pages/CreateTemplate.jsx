@@ -1,15 +1,18 @@
 import React, { useState } from 'react'
 import Header from '../components/Header'
 import { IoMdCloudUpload } from 'react-icons/io'
-import { initialTags } from '../utils/data/dumyData'
+import { initialTags } from '../utils/helpers/helpers'
 import { PuffLoader } from 'react-spinners'
 import { toast } from 'react-toastify'
-import { storage } from '../config/firebase.config'
+import { db, storage } from '../config/firebase.config'
 import { deleteObject, getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage'
 import { FaTrashCan } from 'react-icons/fa6'
-import { serverTimestamp } from 'firebase/firestore'
+import { doc, serverTimestamp, setDoc } from 'firebase/firestore'
+import useTemplate from '../hooks/useTemplate'
 
 const CreateTemplate = () => {
+    const { templates, fetchTemplates, isLoadingTemplates } = useTemplate()
+    console.log(templates);
     const [templateForm, setTemplateForm] = useState({
         title: "",
         tagsList: null,
@@ -22,6 +25,7 @@ const CreateTemplate = () => {
         progress: 0
     })
 
+    // tag list with toggel actions
     const handleToggleTag = (tag) => {
         if (templateForm?.tagsList?.includes(tag)) {
             setTemplateForm({ ...templateForm, tagsList: templateForm?.tagsList?.filter((selected) => selected != tag) })
@@ -32,6 +36,7 @@ const CreateTemplate = () => {
         }
     }
 
+    // select image from the cloud with progress viwed
     const handleSelectImage = (e) => {
         setImageAssets((prev) => ({ ...prev, isImageLoading: true }))
         const file = e.target.files[0];
@@ -67,11 +72,13 @@ const CreateTemplate = () => {
 
     }
 
+    // validat types
     const isAllowedTypes = (file) => {
         const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png']
         return allowedTypes.includes(file.type)
     }
 
+    // cancel image will be delete image from the cloud
     const handleDeleteImageFromCloud = async () => {
         setImageAssets((prev) => ({ ...prev, isImageLoading: true }))
         const desertRef = ref(storage, imageAssets.uri);
@@ -87,18 +94,36 @@ const CreateTemplate = () => {
         });
     }
 
+    // push new template to cloud
     const pushToCloud = async () => {
         const timestemp = serverTimestamp()
         const id = `${Date.now()}`
 
-        const doc = {
+        const newDoc = {
             id: id,
             title: templateForm.title,
             imageURL: imageAssets.uri,
             tags: templateForm?.tagsList || [],
-            name: "tem",
+            name: templates && templates?.length > 0 ? `template${templates?.length + 1}` : 'template1',
             timestemp: timestemp
         }
+
+        await setDoc(doc(db, "templates", id), newDoc).then(() => {
+            setTemplateForm({
+                title: "",
+                tagsList: null,
+                imageURL: null
+            })
+            setImageAssets({
+                isImageLoading: false,
+                uri: null,
+                progress: 0
+            })
+            toast.success("Template Created")
+            fetchTemplates()
+        }).catch(error => {
+            toast.error(`Error : ${error.message}`)
+        })
     }
 
     console.log(templateForm);
@@ -106,7 +131,7 @@ const CreateTemplate = () => {
     return (
         <div>
             <Header />
-            <div className=" md:px-10 md:py-5 p-5">
+            <div className=" py-2 md:py-5">
 
                 <h3 className=' text-md capitalize '>create a new template</h3>
                 {/* main section */}
@@ -115,10 +140,10 @@ const CreateTemplate = () => {
                     {/* left section */}
                     <div className=" w-full flex flex-col gap-3 md:w-1/3 md:max-w-96">
                         {/* tempid */}
-                        <div className=" text-sm text-gray-400 w-full flex items-center justify-end">TEMPID : <span className='text-black'>template1</span></div>
+                        <div className=" text-sm text-gray-400 w-full flex items-center justify-end">TEMPID : <span className='text-black'>{templates && templates?.length > 0 ? `template${templates?.length + 1}` : 'template1'}</span></div>
 
                         {/* input section */}
-                        <input className=' px-3 py-2 rounded-md bg-transparent border-gray-300 border-2 w-full' type="text" placeholder='Template title' value={templateForm?.title} onChange={(e) => setTemplateForm({ ...templateForm, title: e.target.value })} />
+                        <input className=' px-3 py-2 rounded-md outline-none bg-transparent border-gray-300 border-2 w-full' type="text" placeholder='Template title' value={templateForm?.title} onChange={(e) => setTemplateForm({ ...templateForm, title: e.target.value })} />
 
                         {/* upLoadImage section */}
                         <div className=" w-full aspect-[3/4] rounded-md overflow-hidden bg-gray-100 border-2 border-dashed border-gray-300">
@@ -145,7 +170,7 @@ const CreateTemplate = () => {
                         {/* tag section */}
                         <div className=" flex flex-wrap gap-2">
                             {initialTags?.map((tag, index) => (
-                                <div onClick={() => handleToggleTag(tag)} className={` px-2 py-1 text-sm cursor-pointer rounded-md ${templateForm?.tagsList?.includes(tag) ? " bg-blue-500 text-white" : " border-2 border-gray-300 text-gray-400"}`} key={index}>{tag}</div>
+                                <div onClick={() => handleToggleTag(tag)} className={` px-2 py-1 text-sm cursor-pointer rounded-md ${templateForm?.tagsList?.includes(tag) ? " bg-blue-500 text-white border-2" : " border-2 border-gray-300 text-gray-400"}`} key={index}>{tag}</div>
                             ))}
                         </div>
 
@@ -155,9 +180,11 @@ const CreateTemplate = () => {
                     </div>
 
                     {/* right section */}
-                    <div className=" p-2 w-full flex-1 grid grid-cols-2 h-full overflow-y-auto lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
-                        {Array.from({ length: 5 }).map((template, index) => (
-                            <div key={index} className=" aspect-[3/4] rounded-md shadow-md bg-gray-100">{index}</div>
+                    <div className=" w-full flex-1 grid grid-cols-2 h-full overflow-y-auto gap-3">
+                        {templates?.map((template, index) => (
+                            <div key={template?.id} className=" px-8 py-5 rounded-md overflow-hidden  bg-gray-200 backdrop-blur-sm">
+                                <img className='aspect-[3/4] object-cover shadow-2xl' loading='lazy' src={template?.imageURL} alt="" />
+                            </div>
                         ))}
                     </div>
                 </div>

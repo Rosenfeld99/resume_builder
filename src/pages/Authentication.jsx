@@ -7,15 +7,17 @@ import { toast } from 'react-toastify';
 import AuthBtnWithProvider from '../components/AuthBtnWithProvider';
 import MainLoading from '../components/MainLoading';
 import useAuth from '../hooks/useAuth';
+import useUser from '../hooks/userUser';
 
 const Authentication = () => {
     const navigate = useNavigate();
     const { isLoading } = useAuth();
     const [isSignin, setIsSignin] = useState(true)
+    const {currentUser} = useUser()
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user) {
+            if (currentUser) {
                 navigate('/');
             }
         });
@@ -29,15 +31,15 @@ const Authentication = () => {
     return (
         <div className='flex flex-col gap-6 p-4 flex-1 h-screen'>
             <div className="flex items-center justify-between">
-                LOGO
+                <img loading='lazy' src="/logo_resume_builders.png" className=' w-20' alt="logo resume builder" />
             </div>
             <div className="w-full flex flex-1 flex-col items-center justify-center gap-6">
                 <h1 className='text-2xl lg:text-4xl text-blue-700'>Welcome to Express Resume</h1>
                 <p className='text-base text-gray-700'>Express way to create resume</p>
                 <h2 className='text-xl lg:text-2xl text-gray-600'>Authentication</h2>
                 <div className="w-full lg:w-96 rounded-md p-2 flex flex-col items-center justify-center gap-6">
-                    <AuthBtnWithProvider Icon={BsGoogle} label={isSignin?"Sign in With Google" : "Signup With Google"} provider={'GoogleAuthProvider'} isSignin={isSignin}/>
-                    <AuthBtnWithProvider Icon={BsGithub} label={isSignin?"Sign in With Github" : "Signup With Github"} provider={'GithubAuthProvider'} isSignin={isSignin}/>
+                    <AuthBtnWithProvider Icon={BsGoogle} setIsSignin={setIsSignin} label={isSignin?"Sign in With Google" : "Signup With Google"} provider={'GoogleAuthProvider'} isSignin={isSignin}/>
+                    <AuthBtnWithProvider Icon={BsGithub} setIsSignin={setIsSignin} label={isSignin?"Sign in With Github" : "Signup With Github"} provider={'GithubAuthProvider'} isSignin={isSignin}/>
                 </div>
                 <div className=" capitalize">
                     {isSignin ?
